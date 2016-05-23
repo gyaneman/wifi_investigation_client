@@ -13,11 +13,13 @@ import android.widget.TextView;
 import android.widget.CheckBox;
 import org.json.JSONObject;
 import org.json.JSONArray;
+import android.content.Intent;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, HttpClient.OnReceivedListener {
 
     HttpClient httpClient;
     JSONObject json;
+    List<ScanResult> scanResults;
 
     Button mesurementButton;
     Button outputButton;
@@ -51,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    public void getWifi() {
+    public List<ScanResult> getWifi() {
         WifiManager wifiManager = (WifiManager)getSystemService(WIFI_SERVICE);
         List<ScanResult> scanResults = wifiManager.getScanResults();
         TextView stateView = (TextView) findViewById(R.id.textView);
@@ -60,7 +62,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         stateView.setText(Integer.toString(scanResults.size()));
 
         sortScanResult(scanResults);
-        createJson(scanResults);
         boolean isCheckedDetailView = detailCheckBox.isChecked();
 
         if (scanResults == null) {
@@ -90,33 +91,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         resultView.setText(text);
         Log.i("WIFI_INFO", "##########################");
+
+        return scanResults;
     }
 
-    void createJson(List<ScanResult> scanResults) {
-        Log.i("json", "createJson");
-        JSONObject jsonObject = new JSONObject();
-        JSONArray jsonResults = new JSONArray();
-        try {
-            jsonObject.put("device", Build.DEVICE);
-            jsonObject.put("host", Build.HOST);
-            jsonObject.put("result_size", scanResults.size());
-            jsonObject.put("tag", "test");
-            jsonObject.put("place", "ugawa-lab");
-            for (ScanResult scan : scanResults) {
+    String createCSVFromScanResults(List<ScanResult> scanResults) {
+        String csv = "";
+        String sep = " ";
+        for (ScanResult scan : scanResults) {
+                /*
                 JSONObject jsonScan = new JSONObject();
                 jsonScan.put("ssid", scan.SSID);
                 jsonScan.put("bssid", scan.BSSID);
                 jsonScan.put("freq", scan.frequency);
                 jsonScan.put("level", scan.level);
                 jsonResults.put(jsonScan);
-            }
-            jsonObject.put("results", jsonResults);
-            this.json = jsonObject;
-            Log.i("json", jsonObject.toString());
-        } catch (org.json.JSONException e) {
-            e.printStackTrace();
+                */
+            String scanStr =
+                    scan.BSSID + sep + scan.frequency + sep + scan.level + "\n";
+            csv = csv + scanStr;
         }
+        return csv;
     }
+
 
     @Override
     public void onReceived(JSONObject jsonObject) {
@@ -131,9 +128,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view) {
         Log.i("BUTTON", "clicked");
         if (view == mesurementButton) {
-            getWifi();
+            this.scanResults = getWifi();
         } else if (view == outputButton) {
-            httpClient.postRequest("http://192.168.56.1:3000/", json, this);
+            if (scanResults == null) { return; }
+            Intent intent = new Intent(MainActivity.this, OutputActivity.class);
+            intent.putExtra("csv", createCSVFromScanResults(scanResults));
+            startActivity(intent);
         }
     }
 }
