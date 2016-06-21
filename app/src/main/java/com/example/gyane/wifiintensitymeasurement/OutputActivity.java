@@ -43,7 +43,7 @@ public class OutputActivity extends AppCompatActivity implements View.OnClickLis
 
         sendButton.setOnClickListener(this);
 
-        httpClient = new HttpClient();
+        httpClient = new HttpClient(this);
     }
 
     @Override
