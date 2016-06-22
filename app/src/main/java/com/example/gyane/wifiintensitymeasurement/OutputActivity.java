@@ -17,9 +17,9 @@ import java.util.List;
 
 public class OutputActivity extends AppCompatActivity implements View.OnClickListener, HttpClient.OnReceivedListener {
 
-    static final String defaultServerUrl = "http://192.168.56.1:3000/";
+    static final String defaultServerUrl = "https://wifiinvestivation.herokuapp.com/";     //"http://192.168.56.1:3000/";
     HttpClient httpClient;
-    String csv;
+    String[] csvdatas;
     Boolean isSending = false;
 
     Button sendButton;
@@ -49,10 +49,13 @@ public class OutputActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     protected void onResume() {
         super.onResume();
-        csv = getIntent().getStringExtra("csv");
+//        csv = getIntent().getStringExtra("csv");
+        csvdatas = getIntent().getStringArrayExtra("csv");
 
-        if (csv.isEmpty()) {
-            Log.i("OutputActivity", "Error");
+        for (String csv : csvdatas) {
+            if (csv.isEmpty()) {
+                Log.i("OutputActivity", "Error");
+            }
         }
     }
 
@@ -65,8 +68,12 @@ public class OutputActivity extends AppCompatActivity implements View.OnClickLis
             placeField.setFocusable(false);
             isSending = true;
             String url = urlField.getText().toString();
-            Boolean isSuccess = httpClient.postRequest(url, createJson(csv), this);
-            if (!isSuccess) { isSending = false; }
+            for (String csv : csvdatas) {
+                Boolean isSuccess = httpClient.postRequest(url, createJson(csv), this);
+                if (!isSuccess) {
+                    isSending = false;
+                }
+            }
         }
     }
 

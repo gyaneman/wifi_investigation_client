@@ -4,6 +4,7 @@ import java.util.*;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,12 +18,27 @@ import android.content.Intent;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, HttpClient.OnReceivedListener {
 
+    private final int REPEAT_SCAN = 3;
+
     HttpClient httpClient;
     JSONObject json;
-    List<ScanResult> scanResults;
+//    List<ScanResult> scanResults;
 
     Button mesurementButton;
     Button outputButton;
+
+    class ResultDatas {
+        public List<ScanResult> scanResults;
+        public ResultDatas() {
+            scanResults = new ArrayList<ScanResult>();
+        }
+
+        public void setWifi() {
+            this.scanResults = getWifi();
+        }
+    }
+
+    ResultDatas[] resultDatases;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public List<ScanResult> getWifi() {
+        Log.i("WIFI_INFO", "start");
         WifiManager wifiManager = (WifiManager)getSystemService(WIFI_SERVICE);
         List<ScanResult> scanResults = wifiManager.getScanResults();
         TextView stateView = (TextView) findViewById(R.id.textView);
@@ -107,8 +124,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 jsonScan.put("level", scan.level);
                 jsonResults.put(jsonScan);
                 */
-            String scanStr =
-                    scan.BSSID + sep + scan.frequency + sep + scan.level + "\n";
+            String scanStr = scan.BSSID + sep + scan.frequency + sep + scan.level + "\n";
             csv = csv + scanStr;
         }
         return csv;
@@ -128,11 +144,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view) {
         Log.i("BUTTON", "clicked");
         if (view == mesurementButton) {
-            this.scanResults = getWifi();
+            resultDatases = new ResultDatas[REPEAT_SCAN];
+            for (ResultDatas resultData : resultDatases) {
+                resultData = new ResultDatas();
+                resultData.setWifi();
+            }
+//            this.scanResults = getWifi();
         } else if (view == outputButton) {
-            if (scanResults == null) { return; }
+            if (resultDatases == null) { return; }
+            String[] csvDatas = new String[REPEAT_SCAN];
+            for (int i = 0; i < REPEAT_SCAN; i++) {
+                csvDatas[i] = createCSVFromScanResults(resultDatases[i].scanResults);
+            }
             Intent intent = new Intent(MainActivity.this, OutputActivity.class);
-            intent.putExtra("csv", createCSVFromScanResults(scanResults));
+            intent.putExtra("csv", csvDatas);
+//            intent.putExtra("csv", createCSVFromScanResults(scanResults));
             startActivity(intent);
         }
     }
