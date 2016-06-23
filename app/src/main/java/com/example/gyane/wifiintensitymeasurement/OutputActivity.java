@@ -17,7 +17,7 @@ import java.util.List;
 
 public class OutputActivity extends AppCompatActivity implements View.OnClickListener, HttpClient.OnReceivedListener {
 
-    static final String defaultServerUrl = "192.168.33.1";  //"https://wifiinvestivation.herokuapp.com/";     //"http://192.168.56.1:3000/";
+    static final String defaultServerUrl = "https://192.168.33.1:3000";  //"https://wifiinvestivation.herokuapp.com/";     //"http://192.168.56.1:3000/";
     HttpClient httpClient;
     String[] csvdatas;
     Boolean isSending = false;
@@ -43,7 +43,8 @@ public class OutputActivity extends AppCompatActivity implements View.OnClickLis
 
         sendButton.setOnClickListener(this);
 
-        httpClient = new HttpClient(this);
+        httpClient = new HttpClient();
+//        httpClient = new HttpClient(this);
     }
 
     @Override
@@ -89,13 +90,14 @@ public class OutputActivity extends AppCompatActivity implements View.OnClickLis
             }
             String place = placeField.getText().toString();
             jsonObject.put("place", place);
-            for (int i = 0; i < csvdatas.length; i++) {
-                JSONObject csv = new JSONObject();
-                csv.put("csv_data", csvdatas[0]);
-                jsonObjects.put(csv);
-            }
-            Log.i("csv_data", jsonObjects.toString());
-            jsonObject.put("csv_datas", jsonObjects);
+//            for (int i = 0; i < csvdatas.length; i++) {
+//                JSONObject csv = new JSONObject();
+//                csv.put("csv_data", csvdatas[0]);
+//                jsonObjects.put(csv);
+//            }
+//            Log.i("csv_data", jsonObjects.toString());
+//            jsonObject.put("csv_datas", jsonObjects);
+            jsonObject.put("csv_data", csvdatas[0]);
             Log.i("json", jsonObject.toString());
         } catch (org.json.JSONException e) {
             e.printStackTrace();
