@@ -22,10 +22,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     HttpClient httpClient;
     JSONObject json;
-//    List<ScanResult> scanResults;
 
     Button mesurementButton;
     Button outputButton;
+    TextView stateView;
+    TextView resultView;
 
     class ResultDatas {
         public List<ScanResult> scanResults;
@@ -49,6 +50,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mesurementButton.setOnClickListener(this);
         outputButton = (Button) findViewById(R.id.outputButton);
         outputButton.setOnClickListener(this);
+        stateView = (TextView) findViewById(R.id.textView);
+        resultView = (TextView)findViewById(R.id.resultView);
 
         httpClient = new HttpClient();
     }
@@ -73,8 +76,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.i("WIFI_INFO", "start");
         WifiManager wifiManager = (WifiManager)getSystemService(WIFI_SERVICE);
         List<ScanResult> scanResults = wifiManager.getScanResults();
-        TextView stateView = (TextView) findViewById(R.id.textView);
-        TextView resultView = (TextView)findViewById(R.id.resultView);
         CheckBox detailCheckBox = (CheckBox) findViewById(R.id.detailCheckBox);
         stateView.setText(Integer.toString(scanResults.size()));
 
@@ -106,7 +107,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.i("WIFI_INFO", t);
             }
         }
-        resultView.setText(text);
+//        resultView.setText(text);
+        resultView.append(text);
         Log.i("WIFI_INFO", "##########################");
 
         return scanResults;
@@ -145,9 +147,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.i("BUTTON", "clicked");
         if (view == mesurementButton) {
             resultDatases = new ResultDatas[REPEAT_SCAN];
-            for (ResultDatas resultData : resultDatases) {
-                resultData = new ResultDatas();
-                resultData.setWifi();
+            resultView.setText("");
+            for (int i = 0; i < REPEAT_SCAN; i++) {
+                resultView.append((i+1) + "\n");
+                resultDatases[i] = new ResultDatas();
+                resultDatases[i].setWifi();
             }
 //            this.scanResults = getWifi();
         } else if (view == outputButton) {
