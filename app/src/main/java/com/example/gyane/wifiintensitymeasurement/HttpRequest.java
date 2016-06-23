@@ -54,9 +54,9 @@ public class HttpRequest  extends AsyncTask<Void, Void, JSONObject> {
     }
 
 
-//    public HttpRequest(Activity activity) {
-//        this.activity = activity;
-//    }
+    public HttpRequest(Activity activity) {
+        this.activity = activity;
+    }
 
     // getパラメータ
     public void setGetParams(String urlStr, ArrayList<Pair<String, String>> params) {
@@ -209,9 +209,9 @@ public class HttpRequest  extends AsyncTask<Void, Void, JSONObject> {
     @Override
     protected void onPreExecute() {
         shiftToBusy();
-//        progressDialog = new ProgressDialog(activity);
-//        progressDialog.setMessage("Sending data ...");
-//        progressDialog.show();
+        progressDialog = new ProgressDialog(activity);
+        progressDialog.setMessage("Sending data ...");
+        progressDialog.show();
     }
 
     @Override
@@ -243,6 +243,6 @@ public class HttpRequest  extends AsyncTask<Void, Void, JSONObject> {
     protected void onPostExecute(JSONObject json) {
         shiftToListen();
         listener.onReceived(json);
-//        progressDialog.dismiss();
+        progressDialog.dismiss();
     }
 }
