@@ -3,17 +3,15 @@ package com.example.gyane.wifiintensitymeasurement;
 import java.util.*;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.os.Build;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.CheckBox;
 import org.json.JSONObject;
-import org.json.JSONArray;
 import android.content.Intent;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, HttpClient.OnReceivedListener {
@@ -26,7 +24,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button mesurementButton;
     Button outputButton;
     TextView stateView;
-    TextView resultView;
+    LinearLayout layout;
 
     class ResultDatas {
         public List<ScanResult> scanResults;
@@ -51,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         outputButton = (Button) findViewById(R.id.outputButton);
         outputButton.setOnClickListener(this);
         stateView = (TextView) findViewById(R.id.textView);
-        resultView = (TextView)findViewById(R.id.resultView);
+        layout = (LinearLayout) findViewById(R.id.result);
 
         httpClient = new HttpClient();
     }
@@ -99,16 +97,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 String t =
                         ssid + " "
-                        + scanResult.BSSID + " "
-                        + scanResult.frequency + " "
-                        + scanResult.level
-                        + "\n";
-                    text += t;
+                                + scanResult.BSSID + " "
+                                + scanResult.frequency + " "
+                                + scanResult.level
+                                + "\n";
+                text += t;
                 Log.i("WIFI_INFO", t);
             }
         }
 //        resultView.setText(text);
-        resultView.append(text);
+//        resultView.append(text);
+        ResultItem item = new ResultItem(this);
+        item.setText(text);
+        layout.addView(item);
+
         Log.i("WIFI_INFO", "##########################");
 
         return scanResults;
@@ -147,13 +149,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.i("BUTTON", "clicked");
         if (view == mesurementButton) {
             resultDatases = new ResultDatas[REPEAT_SCAN];
-            resultView.setText("");
             for (int i = 0; i < REPEAT_SCAN; i++) {
-                resultView.append((i+1) + "\n");
+//                resultView.append((i+1) + "\n");
                 resultDatases[i] = new ResultDatas();
                 resultDatases[i].setWifi();
             }
-//            this.scanResults = getWifi();
         } else if (view == outputButton) {
             if (resultDatases == null) { return; }
             String[] csvDatas = new String[REPEAT_SCAN];
@@ -162,7 +162,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             Intent intent = new Intent(MainActivity.this, OutputActivity.class);
             intent.putExtra("csv", csvDatas);
-//            intent.putExtra("csv", createCSVFromScanResults(scanResults));
             startActivity(intent);
         }
     }
