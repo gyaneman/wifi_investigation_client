@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public final static int REPEAT_SCAN = 3;
     public final static int DELAY_SEARCH = 6000;
 
-    private ResultDatas[] mResultData = new ResultDatas[REPEAT_SCAN];
+    private ResultDatas[] mResultData;
 
     HttpClient httpClient;
     JSONObject json;
@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if (view == outputButton) {
             if (mResultData == null) { return; }
             String[] csvDatas = new String[REPEAT_SCAN];
-            for (int i = 0; i < REPEAT_SCAN; i++) {
+            for (int i = 0; i < mResultData.length; i++) {
                 csvDatas[i] = createCSVFromScanResults(mResultData[i].scanResults);
             }
             Intent intent = new Intent(MainActivity.this, OutputActivity.class);
@@ -155,16 +155,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             showDialog();
             layout.removeAllViews();
+            mResultData = new ResultDatas[REPEAT_SCAN];
         }
 
         @Override
         protected Void doInBackground(Void... params) {
             try {
                 for (int count = 0; count < REPEAT_SCAN; count++) {
-                    if (isCancelled()) {
-                        return null;
-                    }
-
                     mResultItem = new ResultDatas();
                     mResultItem.setWifi();
 
@@ -197,26 +194,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.d("MainAsync", "onPostExecute");
         }
 
-        @Override
-        protected void onCancelled() {
-            super.onCancelled();
-
-            dismissDialog();
-        }
-
         private void showDialog() {
             mProgressDialog = new ProgressDialog(mContext);
             mProgressDialog.setMessage("測定中");
             mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             mProgressDialog.setMax(REPEAT_SCAN);
             mProgressDialog.incrementProgressBy(0);
-            mProgressDialog.setCancelable(true);
-            mProgressDialog.setButton("キャンセル", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    cancel(true);
-                }
-            });
+            mProgressDialog.setCancelable(false);
             mProgressDialog.show();
         }
 
