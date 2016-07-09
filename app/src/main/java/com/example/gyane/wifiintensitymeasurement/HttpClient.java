@@ -1,5 +1,7 @@
 package com.example.gyane.wifiintensitymeasurement;
 
+import android.app.Activity;
+import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 
@@ -15,17 +17,22 @@ public class HttpClient implements HttpRequest.OnReceivedListener {
     HttpRequest httpRequest;
     OnReceivedListener listener;
 
+    public HttpClient() {}
+    public HttpClient(Activity activity) {
+        httpRequest = new HttpRequest(activity);
+    }
+
     public interface OnReceivedListener {
         public void onReceived(JSONObject jsonObject);
     }
 
     public boolean getRequest(String urlStr, ArrayList<Pair<String, String>> params, OnReceivedListener listener) {
-        if (this.httpRequest != null) {
-            return false;
-        }
+//        if (this.httpRequest != null) {
+//            return false;
+//        }
 
         this.listener = listener;
-        httpRequest = new HttpRequest();
+//        httpRequest = new HttpRequest();
         httpRequest.setGetParams(urlStr, params);
         httpRequest.setListener(this);
         httpRequest.execute();     // 非同期処理開始
@@ -33,12 +40,13 @@ public class HttpClient implements HttpRequest.OnReceivedListener {
     }
 
     public boolean postRequest(String urlStr, JSONObject jsonParams, OnReceivedListener listener) {
-        if (this.httpRequest != null) {
-            return false;
-        }
+//        if (this.httpRequest != null) {
+//            return false;
+//        }
 
         this.listener = listener;
-        httpRequest = new HttpRequest();
+//        httpRequest = new HttpRequest();
+        Log.i("aa", jsonParams.toString());
         httpRequest.setPostParams(urlStr, jsonParams);
         httpRequest.setListener(this);
         httpRequest.execute();     // 非同期処理開始

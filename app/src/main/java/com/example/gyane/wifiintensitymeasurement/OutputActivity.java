@@ -17,9 +17,9 @@ import java.util.List;
 
 public class OutputActivity extends AppCompatActivity implements View.OnClickListener, HttpClient.OnReceivedListener {
 
-    static final String defaultServerUrl = "http://192.168.56.1:3000/";
+    static final String defaultServerUrl = "http://192.168.33.1:3000";  //"https://wifiinvestivation.herokuapp.com/";     //"http://192.168.56.1:3000/";
     HttpClient httpClient;
-    String csv;
+    String[] csvdatas;
     Boolean isSending = false;
 
     Button sendButton;
@@ -43,16 +43,19 @@ public class OutputActivity extends AppCompatActivity implements View.OnClickLis
 
         sendButton.setOnClickListener(this);
 
-        httpClient = new HttpClient();
+        httpClient = new HttpClient(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        csv = getIntent().getStringExtra("csv");
+//        csv = getIntent().getStringExtra("csv");
+        csvdatas = getIntent().getStringArrayExtra("csv");
 
-        if (csv.isEmpty()) {
-            Log.i("OutputActivity", "Error");
+        for (String csv : csvdatas) {
+            if (csv.isEmpty()) {
+                Log.i("OutputActivity", "Error");
+            }
         }
     }
 
@@ -65,16 +68,18 @@ public class OutputActivity extends AppCompatActivity implements View.OnClickLis
             placeField.setFocusable(false);
             isSending = true;
             String url = urlField.getText().toString();
-            Boolean isSuccess = httpClient.postRequest(url, createJson(csv), this);
-            if (!isSuccess) { isSending = false; }
+            Boolean isSuccess = httpClient.postRequest(url, createJson(csvdatas), this);
+            if (!isSuccess) {
+                isSending = false;
+            }
         }
     }
 
 
-    JSONObject createJson(String csv) {
+    JSONObject createJson(String[] csvdatas) {
         Log.i("json", "createJson");
         JSONObject jsonObject = new JSONObject();
-        JSONArray jsonResults = new JSONArray();
+        JSONArray jsonObjects = new JSONArray();
         try {
             jsonObject.put("device", Build.DEVICE);
             jsonObject.put("host", Build.HOST);
@@ -84,8 +89,13 @@ public class OutputActivity extends AppCompatActivity implements View.OnClickLis
             }
             String place = placeField.getText().toString();
             jsonObject.put("place", place);
-            // jsonObject.put("results", jsonResults);
-            jsonObject.put("csv_data", csv);
+            for (int i = 0; i < csvdatas.length; i++) {
+                JSONObject csv = new JSONObject();
+                csv.put("csv_data", csvdatas[0]);
+                jsonObjects.put(csv);
+            }
+            Log.i("csv_data", jsonObjects.toString());
+            jsonObject.put("csv_datas", jsonObjects);
             Log.i("json", jsonObject.toString());
         } catch (org.json.JSONException e) {
             e.printStackTrace();
